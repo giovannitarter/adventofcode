@@ -82,27 +82,27 @@ print("sol1: {}".format(res[1] * res[3]))
 ##################################################
 #(0), 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19, (22)
 
-test = [0, 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19, 22]
+test_simple = [0, 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19, 22]
 
-def count_permutations(seq):
+def count_permutations(seq, lev=0):
 
-    print("\n==============================")
-    print(seq)
+    print("\n") 
+    print(" " * lev, "==============================")
+    print(" " * lev, seq)
 
     acc = 1
     for idx in  range(1, len(seq) -1):
         if seq[idx+1] - seq[idx-1] <= 3:
-            print(".. ", seq[idx])
-            tmp = list(seq)
-            tmp.pop(idx)
-            acc = acc + count_permutations(tmp)
+            print(" " * lev, ".. ", seq[idx])
+            acc = acc + 2 * count_permutations(seq[idx:], lev+1)
 
     return acc
 
 
 
 
-print(count_permutations(test))
+print(count_permutations(test_simple))
+#print(count_permutations(adapter_set))
 
 
 
