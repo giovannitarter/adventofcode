@@ -9,16 +9,17 @@ neigh = []
 for i in elem:
     for j in elem:
         for k in elem:
-            neigh.append((i,j,k))
-neigh.remove((0, 0, 0))
+            for m in elem:
+                neigh.append((i,j,k,m))
+neigh.remove((0, 0, 0, 0))
 neigh_mat = neigh.copy()
 
 
 def get_all_neigh(pos, neigh_mat):
 
     res = []
-    for x, y, z in neigh_mat:
-        n = ((pos[0] + x, pos[1] + y, pos[2] + z))
+    for x, y, z, m in neigh_mat:
+        n = ((pos[0] + x, pos[1] + y, pos[2] + z, pos[3] + m))
         res.append(n)
 
     return res
@@ -48,8 +49,6 @@ def cycle(space):
         for n in neigh:
             eval_points.add(n)
 
-    #print("all_points:", len(eval_points))
-
     for pos in eval_points:
 
         #print("\npos: {}".format(pos))
@@ -66,8 +65,6 @@ def cycle(space):
             if active == 3:
                 new_space[pos] = "#"
 
-        #print("neigh({}) : {}".format(pos, neigh))
-
     return new_space
 
 
@@ -76,21 +73,6 @@ def ax_bound(ax_nr, space):
     min_p = min(points)
     max_p = max(points) + 1
     return (min_p, max_p)
-
-
-def print_space(space):
-    #print(space)
-    #print(ax_bound(1, space))
-
-    for z in range(*ax_bound(2, space), 1):
-        print("\nz={}".format(z))
-        for y in range(*ax_bound(1, space), 1):
-            row = []
-            for x in range(*ax_bound(0, space), 1):
-                row.append(space.get((x,y,z), "."))
-            print("".join(row))
-
-    return
 
 
 def count_active(space):
@@ -112,37 +94,16 @@ fd = open(sys.argv[1])
 text = fd.read()
 fd.close()
 
-
 lines = text.split("\n")
 lines = [l for l in lines if l != ""]
-
-#for l in lines:
-#    print(l)
-
-
 
 space = {}
 for y, l in enumerate(lines):
     for x, v in enumerate(l):
-        pos = (x, y, 0)
+        pos = (x, y, 0, 0)
         space[pos] = v
-
-#for n in neigh:
-#    print(n)
-
-
-
-
-print_space(space)
-
-#print(get_all_neigh((1, 2, 3), neigh_mat))
-
-#print(get_active((1, 1, 0), space))
 
 for r in range(1, 7):
     space = cycle(space)
     print("cycle {}, count: {}".format(r, count_active(space)))
 
-#print_space(space)
-
-#print(space)
