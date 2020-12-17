@@ -53,6 +53,21 @@ def check_ticket(ticket, rule):
     return invalid_nr
 
 
+def check_column(column, rules):
+    """
+    returns the list of compatible columns
+    """
+    
+    res = []
+
+    for r in rules:
+        c_inv = check_ticket(column, r)
+        if len(c_inv) == 0:
+            res.append(r[0])
+
+    return res
+
+
 ##########################################
 # MAIN
 #########################################
@@ -92,27 +107,58 @@ for n in nearby:
         valid_tickets.append(n)
 
 #print(acc)
-print("SUM1: {}".format(sum(acc)))
+print("SOL1: {}".format(sum(acc)))
 
 print("valid tickets nr: {}".format(len(valid_tickets)))
 
-categories = [x[0] for x in rules]
-print(categories)
 
-
-
-print(rules)
 
 
 transp = list(zip(* valid_tickets))
-for ti, t in enumerate(transp):
+ctable = {}
+for ci, c in enumerate(transp):
+    comp = check_column(c, rules)
+    ctable[ci] = comp
 
-    res = {}
-    tmp_rules = list(rules)
-    for r in rules:
-        c_inv = check_ticket(t, r)
-        if len(c_inv) == 0:
-            print(r[0], ti)
+#print(ctable)
+
+
+res = {}
+cat = [x[0] for x in rules]
+cols = ctable.keys()
+
+#assigning columns to categories (max 1 col matching a category)
+while len(cat) > 0:
+    for ci in ctable:
+        
+        ccat = ctable[ci] 
+        if len(ccat) == 1:
+
+            assigned = ccat[0]
+            print("assigned \"{}\" to {}".format(assigned, ci))
+
+            res[assigned] = ci
+            cat.remove(ccat[0])
+
+            for c in ctable:
+                if assigned in ctable[c]:
+                    ctable[c].remove(assigned)
+
+print(res)
+
+acc = []
+for cat in res:
+    if cat.startswith("departure"):
+        acc.append(my_ticket[res[cat]])
+#print(acc)
+
+sol2 = 1
+for a in acc:
+    sol2 = sol2 * a
+print("SOL2: {}".format(sol2))
+
+
+#print("col {} compatible with {}".format(ci, comp))
 
 
 
