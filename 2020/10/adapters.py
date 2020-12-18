@@ -86,7 +86,7 @@ test_simple = [0, 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19, 22]
 
 def count_permutations(seq, lev=0):
 
-    print("\n") 
+    print("\n")
     print(" " * lev, "==============================")
     print(" " * lev, seq)
 
@@ -94,14 +94,14 @@ def count_permutations(seq, lev=0):
     for idx in  range(1, len(seq) -1):
         if seq[idx+1] - seq[idx-1] <= 3:
             print(" " * lev, ".. ", seq[idx])
-            acc = acc + 2 * count_permutations(seq[idx:], lev+1)
+            #acc = acc + 2 * count_permutations(seq[idx:], lev+1)
 
     return acc
 
 
 
 
-print(count_permutations(test_simple))
+print(count_permutations(adapter_set))
 #print(count_permutations(adapter_set))
 
 
