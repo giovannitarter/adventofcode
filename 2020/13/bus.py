@@ -41,27 +41,54 @@ lines = [l for l in lines if l != ""]
 
 min_depart = int(lines[0])
 
-bus_nr = []
-for br in lines[1].split(","):
-    if br != "x":
-        bus_nr.append(int(br))
+bus_nr_x = lines[1].split(",")
+bus_nr = [int(x) for x in bus_nr_x if x != "x"]
+bus_nr_pos = [bus_nr_x.index(x) for x in bus_nr_x if x != "x"]
 
-print(min_depart)
-print(bus_nr)
+
+print("min_depart: {}".format(min_depart))
+print("bus: {}".format(bus_nr))
 
 mod_bus_nr = [x - (min_depart % x) for x in bus_nr]
 
 next_bus_scat = min(mod_bus_nr)
 next_bus = (bus_nr[mod_bus_nr.index(next_bus_scat)])
 
-print(next_bus_scat)
-print(next_bus)
-print(next_bus_scat * next_bus)
+#print(next_bus_scat)
+#print(next_bus)
+
+print("SOL1: {}".format(next_bus_scat * next_bus))
 
 
+#print(mul_inv(10,7))
 
-n = [7, 13, 59, 31, 19 ]
-a = [0, 1, 4, 6, 7]
+#n = [7, 13, 59, 31, 19 ]
 
-print("crt")
-print(chinese_remainder(n, a))
+#n = [7, 13, 59, 31, 19 ]
+#a = [0, 1, 4, 6, 7]
+
+
+#a = [0, 12, 55, 25, 12]
+#print(n-a)
+
+print("")
+print(bus_nr_pos)
+
+
+n = bus_nr
+a = bus_nr_pos 
+#
+b = []
+for i, ni in enumerate(n):
+    b.append(ni - a[i])
+#
+print(b)
+#
+##print(bus_nr)
+##print(mod_bus_nr)
+#
+#n = bus_nr
+#
+##for n in 
+#
+print("SOL2: {}".format(chinese_remainder(n, b)))
