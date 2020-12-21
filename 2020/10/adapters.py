@@ -47,62 +47,68 @@ print("sol1: {}".format(res[1] * res[3]))
 
 
 
-#(0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
-#32, 33, 34, 35, 38, 39, 42, 45, 46, 47, 48, 49, (52)
-#
-#(0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
-#32, 33, 34, 35, 38, 39, 42, 45, 46, 47, 49, (52)
-#
-#(0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
-#32, 33, 34, 35, 38, 39, 42, 45, 46, 48, 49, (52)
-#
-#(0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
-#32, 33, 34, 35, 38, 39, 42, 45, 46, 49, (52)
-#
-#(0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
-#32, 33, 34, 35, 38, 39, 42, 45, 47, 48, 49, (52)
-#
-#(0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
-#46, 48, 49, (52)
-#
-#(0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
-#46, 49, (52)
-#
-#(0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
-#47, 48, 49, (52)
-#
-#(0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
-#47, 49, (52)
-#
-#(0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
-#48, 49, (52)
+def count_permutations(seq):
+
+    res = 1
+
+    #cstart = 0
+    #print("")
+    #while cstart < len(seq):
+
+    #    cend = cstart
+    #    tmp = []
+    #    while cend <= len(seq) and seq[cend] - seq[cstart] <= 4:
+    #        tmp.append(seq[cend])
+    #        cend = cend + 1
+    #    
+    #    print(tmp)
+    #    cstart = cend - 1
+
+    #for idx, s in enumerate(seq):
+
+    #    if idx < len(seq) - 4:
+    #        tmp = seq[idx:idx+5]
+    #        diff = tmp[4] - tmp[0]
+    #        print(tmp, diff)
+
+    idx = 1
+    mul_list = []
+    while idx < len(seq) - 1:
+       
+        print("\nidx: {}, val: {}".format(idx, seq[idx]))
+        mul = 1
+
+        if seq[idx + 1] - seq[idx - 1] < 3:
+            mul = 2
+            
+            if (
+                    idx+3 < len(seq) 
+                    and seq[idx+2] == seq[idx]+2 
+                    and seq[idx+1] == seq[idx]+1
+                    and seq[idx+3] == seq[idx]+3
+               ):
+                mul = 7
+                idx = idx + 2
+            print("next: {}".format(seq[idx]))
+
+            #print("idx: {} -> {} ({})".format(idx, seq[idx], mul))
+
+        mul_list.append(mul)
+        print("mul: {}".format(mul))
+        res = res * mul
+        idx = idx + 1
+
+#    print(mul_list)
+    return res
 
 
 
-##################################################
-#(0), 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19, (22)
+print(adapter_set)
 
-test_simple = [0, 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19, 22]
+sol2 = count_permutations(adapter_set)
 
-def count_permutations(seq, lev=0):
-
-    print("\n")
-    print(" " * lev, "==============================")
-    print(" " * lev, seq)
-
-    acc = 1
-    for idx in  range(1, len(seq) -1):
-        if seq[idx+1] - seq[idx-1] <= 3:
-            print(" " * lev, ".. ", seq[idx])
-            #acc = acc + 2 * count_permutations(seq[idx:], lev+1)
-
-    return acc
-
-
-
-
-print(count_permutations(adapter_set))
-#print(count_permutations(adapter_set))
+print("\nSOL2:")
+print(sol2)
 
 
 
