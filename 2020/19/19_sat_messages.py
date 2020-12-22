@@ -3,45 +3,54 @@
 import sys
 import re
 
-fd = open(sys.argv[1])
-text = fd.read()
-fd.close()
+
+TERM = r"tr"
+OR = r"or"
+LIST = r"ls"
+LOOP = r"lp"
 
 
-lines = text.split("\n")
-#lines = [l for l in lines if l != ""]
+def parse_lines(lines):
+
+    strings_start = lines.index("")
+    rules_lines = lines[:strings_start]
+    strings = lines[strings_start+1:]
+
+    strings = [s for s in strings if s != ""]
 
 
-strings_start = lines.index("")
-rules_lines = lines[:strings_start]
-strings = lines[strings_start+1:]
+    rules = {}
+    for r in rules_lines:
 
-strings = [s for s in strings if s != ""]
+        if (m := re.match("(\d*): \"(\w*)\"", r)) is not None:
+            rules[int(m.group(1))] = (TERM, m.group(2), None)
 
-TERM = "tr"
-OR = "or"
-LIST = "ls"
+        elif (idx := r.find(" |")) != -1:
+            m = re.match("(\d*): ", r)
+            bef = [int(x) for x in r[m.end():idx].split(" ")]
+            aft = [int(x) for x in r[idx+3:].split(" ")]
 
-rules = {}
-for r in rules_lines:
+            idx = int(m.group(1))
 
-    if (m := re.match("(\d*): \"(\w*)\"", r)) is not None:
-        rules[int(m.group(1))] = (TERM, m.group(2), None)
+            loop = False
+            if idx in bef:
+                loop = True
+            elif idx in aft:
+                loop = True
 
-    elif (idx := r.find(" |")) != -1:
-        m = re.match("(\d*): ", r)
-        bef = [int(x) for x in r[m.end():idx].split(" ")]
-        aft = [int(x) for x in r[idx+3:].split(" ")]
-        rules[int(m.group(1))] = (OR, bef, aft)
+            if loop == False:
+                rules[int(m.group(1))] = (OR, bef, aft)
+            else:
+                rules[int(m.group(1))] = (LOOP, bef, aft)
 
-    else:
-        m = re.match("(\d*): ", r)
-        rules[int(m.group(1))] = (LIST, [int(x) for x in r[m.end():].split(" ")], None)
+        else:
+            m = re.match("(\d*): ", r)
+            rules[int(m.group(1))] = (LIST, [int(x) for x in r[m.end():].split(" ")], None)
+
+    return (rules, strings)
 
 
 def build_regexp(rule_nr, rules):
-
-    #print(rules)
 
     tp, arg1, arg2 = rules[rule_nr]
 
@@ -52,7 +61,7 @@ def build_regexp(rule_nr, rules):
 
     elif tp == LIST:
         tmp = [build_regexp(x, rules) for x in arg1]
-        print("tmp:", tmp)
+        #print("tmp:", tmp)
         res = "".join(tmp)
 
     elif tp == OR:
@@ -60,13 +69,51 @@ def build_regexp(rule_nr, rules):
         aft = "".join([build_regexp(x, rules) for x in arg2])
         res = "(({})|({}))".format(aft, bef)
 
+    elif tp == LOOP:
+        #bef = "".join([build_regexp(x, rules) for x in arg1])
+
+        #print("LOOP")
+
+
+        loop_pos = arg2.index(rule_nr)
+        bef_loop = arg2[:loop_pos]
+        aft_loop = arg2[loop_pos+1:]
+
+
+        #print("bef_loop: {}".format(bef_loop))
+        bef = "".join([build_regexp(x, rules) for x in bef_loop])
+
+        #print("aft_loop: {}".format(aft_loop))
+        aft = "".join([build_regexp(x, rules) for x in aft_loop])
+
+        res = []
+        for x in [bef, aft]:
+            if len(x) > 0:
+                res.append("({})+".format(x))
+
+        res = "".join(res)
+        #print(res)
+
     return res
 
 
-    #print(m)
+########################################
+# MAIN
+#######################################
+
+
+fd = open(sys.argv[1])
+text = fd.read()
+fd.close()
+
+
+lines = text.split("\n")
+
+
+rules, strings = parse_lines(lines)
 
 print("\nRules:")
-for r in rules:
+for r in sorted(rules.keys()):
     print("{} -> {}".format(r, rules[r]))
 
 print("\nStrings:")
@@ -88,7 +135,64 @@ for s in strings:
 print("SOL1")
 print(acc)
 
-#print(rules[0])
 
+#PART2
+
+replace = {
+    "8:": "8: 42 | 42 8",
+    "11:": "11: 42 31 | 42 11 31",
+}
+
+lines2 = lines.copy()
+for k in replace:
+    for i, l in enumerate(lines2):
+        if l.startswith(k):
+            lines2.pop(i)
+            lines2.insert(i, replace[k])
+
+
+rules2, strings = parse_lines(lines2)
+print("\nRules2:")
+for r in sorted(rules2.keys()):
+    print("{} -> {}".format(r, rules2[r]))
+
+#print("\nStrings:")
+#print(strings)
+
+res = build_regexp(0, rules2)
+print("\nres", res)
+
+#No way with regex to match an exact number of repetitions!
+rex42 = build_regexp(42, rules2)
+rex42 = "^" + rex42
+print("\nrex42", rex42)
+rex31 = build_regexp(31, rules2)
+rex31 = rex31 + "$"
+print("\nrex31", rex31)
+
+print("\n")
+acc = 0
+for s in strings:
+    m = re.fullmatch(res, s)
+    #print(s, m)
+    if m is not None:
+
+        m42 = re.match(rex42, s)
+        m31 = re.search(rex31, s)
+        #print(m42, m31)
+        #print(len(s))
+
+
+        tmp = s
+        i = 0
+        while tmp.startswith(m42.group(0)):
+            tmp = tmp[len(m42.group(0)):]
+            i = i +1
+            print(i)
+
+        acc = acc + 1
+
+print("SOL2")
+print(acc)
 
 
