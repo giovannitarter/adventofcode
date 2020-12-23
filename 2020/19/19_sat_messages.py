@@ -70,20 +70,13 @@ def build_regexp(rule_nr, rules):
         res = "(({})|({}))".format(aft, bef)
 
     elif tp == LOOP:
-        #bef = "".join([build_regexp(x, rules) for x in arg1])
-
-        #print("LOOP")
-
-
         loop_pos = arg2.index(rule_nr)
         bef_loop = arg2[:loop_pos]
         aft_loop = arg2[loop_pos+1:]
 
 
-        #print("bef_loop: {}".format(bef_loop))
         bef = "".join([build_regexp(x, rules) for x in bef_loop])
 
-        #print("aft_loop: {}".format(aft_loop))
         aft = "".join([build_regexp(x, rules) for x in aft_loop])
 
         res = []
@@ -164,10 +157,10 @@ print("\nres", res)
 
 #No way with regex to match an exact number of repetitions!
 rex42 = build_regexp(42, rules2)
-rex42 = "^" + rex42
+#rex42 = "^" + rex42
 print("\nrex42", rex42)
 rex31 = build_regexp(31, rules2)
-rex31 = rex31 + "$"
+#rex31 = rex31 + "$"
 print("\nrex31", rex31)
 
 print("\n")
@@ -177,20 +170,29 @@ for s in strings:
     #print(s, m)
     if m is not None:
 
-        m42 = re.match(rex42, s)
-        m31 = re.search(rex31, s)
-        #print(m42, m31)
-        #print(len(s))
-
-
+        print("")
+        print(s)
         tmp = s
+        
         i = 0
-        while tmp.startswith(m42.group(0)):
-            tmp = tmp[len(m42.group(0)):]
-            i = i +1
-            print(i)
+        while (m42 := re.match(rex42, tmp)):
+            #print(m42)
+            tmp = tmp[m42.end():]
+            i  += 1
+        #print(i)
+        #print(tmp)
 
-        acc = acc + 1
+        #print("m31")
+        j = 0
+        while (m31 := re.match(rex31, tmp)):
+            #print(m31)
+            tmp = tmp[m31.end():]
+            j += 1
+        #print(j)
+        print(i, j, "\"{}\"".format(tmp))
+
+        if tmp == "" and i > j:
+            acc = acc + 1
 
 print("SOL2")
 print(acc)
