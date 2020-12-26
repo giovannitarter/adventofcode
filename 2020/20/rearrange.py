@@ -29,7 +29,7 @@ def print_tile(tile):
 
     for i in tile:
         print(i)
-    
+
     return
 
 
@@ -40,7 +40,7 @@ def nop(image):
 def transp(image):
     #print("transp:", image)
     transp = zip(*image)
-    transp = ["".join(x) for x in transp]    
+    transp = ["".join(x) for x in transp]
     return transp
 
 
@@ -51,7 +51,7 @@ def flip_array(arr):
 
 
 def flip_h(image):
-    res = [flip_array(x) for x in image] 
+    res = [flip_array(x) for x in image]
     return res
 
 
@@ -89,7 +89,7 @@ def all_transforms(image):
 
             res.add(tmp)
     #print(res)
-    
+
     tmp = []
     for r in res:
         t = []
@@ -102,10 +102,10 @@ def all_transforms(image):
 
 
 def borders(image):
-    
+
     res = []
     itransp = transp(image)
-    
+
     res.append(image[0]) #NORTH
     res.append(itransp[-1]) #EAST
     res.append(image[-1]) #SOUTH
@@ -123,7 +123,7 @@ def all_borders(image_list):
     return(list(res))
 
 
-def check_match(tile1, tile2, mdir):
+def move(tid, tile, adj, mdir):
 
     if mdir == "RIGHT":
         m1bor = bdir["EAST"]
@@ -132,111 +132,71 @@ def check_match(tile1, tile2, mdir):
         m1bor = bdir["SOUTH"]
         m2bor = bdir["NORTH"]
 
+    b1 = borders(tile)[m1bor]
+    for a in adj:
+        at2 = tile_transforms[a]
 
-    at2 = all_transforms(tile2)
-    b1 = (borders(tile1))[m1bor]
-    
-    for im2  in at2:
-        b2 = (borders(im2))[m2bor]
-        if b1 == b2:
-            return(im2)
+        for im2 in at2:
+            b2 = borders(im2)[m2bor]
+            if b1 == b2:
+                return(a, im2)
 
-    return 
+    return None
+
 
 
 def build_row(tid, tile, x_nr):
-    
+
     res = [(tid, tile)]
 
     cid = tid
     ctile = tile
 
     for x in range(1, x_nr):
-        for nid in adj[cid]:
-            ntile = tiles[nid]
-            mt = check_match(ctile, ntile, "RIGHT")
-            if mt is not None:
-                #print("found ", nid)
-                cid = nid
-                ctile = mt
-                res.append((cid, ctile))
+        nxt = move(cid, ctile, adj[cid], "RIGHT")
+        #print("nxt", nxt)
+        if nxt is not None:
+            res.append(nxt)
+            cid, ctile = nxt
+        else:
+            return []
 
     return res
 
 
 def try_build(sid, stile, y_nr):
-    print("\ntry_build {}".format(sid))
+    #print("\ntry_build {}".format(sid))
 
     cid = sid
     ctile = stile
 
-    print_tile(ctile)
+    #print_tile(ctile)
 
     res = []
     for y in range(y_nr):
 
-        print("")
-        print("y: {}, cid {}".format(y, cid))
-        print("res: {}".format(res))
+        #print("")
+        #print("y: {}, cid {}".format(y, cid))
+        #print("res: {}".format(res))
 
         row = build_row(cid, ctile, y_nr)
-        trow = [x[0] for x in row]
-        print("row:", trow) 
-        
+        #trow = [x[0] for x in row]
+        #print("row:", trow)
+
         if len(row) != y_nr:
             break
         else:
             res.append(row)
 
-        print("r adj cid {}: {}".format(cid, adj[cid]))
-        for nid in adj[cid]:
-            
-            if nid in [r[0] for r in row]:
-                continue
+        #print("r adj cid {}: {}".format(cid, adj[cid]))
 
-            print("checking down {}".format(nid))
-            
-            ntile = tiles[nid]
-            mt = check_match(ctile, ntile, "DOWN")
-            if mt is not None:
-                #print("nid", nid)
-                cid = nid
-                ctile = mt
-            else:
-                continue
+        down = move(cid, ctile, adj[cid], "DOWN")
+        if down is not None:
+            cid, ctile = down
+        else:
+            break
 
     return res
-
-
-    #otiles = {
-    #        first_tile : stile
-    #        }
-    #
-    ##print("")
-    #cid = first_tile
-    #    #print("\ny: {}".format(y))
-    #    #print("x: 0 {}".format(cid))
-    #    
-    #    ftl = cid
-    #    
-    #    #print(adj[ftl])
-    #    for nid in adj[ftl]:
-    #        
-    #        if nid in otiles:
-    #            continue
-    #        
-    #        ntile = tiles[nid]
-    #
-    #        #print("checking", nid)
-    #        #print(mt)
-    #        if mt is not None:
-    #            cid = nid
-    #            otiles[nid] = mt
-    #            #print("")
-    #        else:
-    #            break
-    #
-    #return otiles
 
 
 
@@ -254,7 +214,7 @@ tiles = parse_text(text)
 adj = {}
 for tid1 in tiles:
     for tid2 in tiles:
-        
+
         if tid1 == tid2:
             continue
 
@@ -290,17 +250,14 @@ for t in tiles:
 
 
 starts = [(c, tile_transforms[c]) for c in corners]
-#print(starts)
 
 
-for sid, s in starts[:1]:
+print("")
+for sid, s in starts[1:2]:
     for t in s:
-        
-        #for tid, tile in build_row(sid, t, image_edge):
-        #    print(tid)
-        #    print_tile(tile)
 
         res = try_build(sid, t, image_edge)
+        #print(res)
         acc = 0
 
         for r in res:
@@ -308,7 +265,7 @@ for sid, s in starts[:1]:
 
         if acc == len(tiles):
             print("Seq found")
-            
+
             for row in res:
                 print([x[0] for x in row])
                 #for xid, xtile in row:
@@ -316,17 +273,5 @@ for sid, s in starts[:1]:
                 #    print_tile(xtile)
 
             sys.exit(1)
-
-        
-                
-#for o in otiles:
-#    print("")
-#    print_tile(otiles[o])
-
-
-#print("##################")
-#for a in all_transforms(tiles["2473"]):
-#    print("")
-#    print_tile(a)
 
 
