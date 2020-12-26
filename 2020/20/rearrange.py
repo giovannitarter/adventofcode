@@ -12,6 +12,11 @@ bdir = {
         "WEST" :3,
 }
 
+monster = """                  # 
+#    ##    ##    ###
+ #  #  #  #  #  #   
+"""
+
 
 def parse_text(text):
 
@@ -23,6 +28,15 @@ def parse_text(text):
         tiles[tile_nr] = image
 
     return tiles
+
+
+def parse_monster(text):
+    res = []
+    for y, line in enumerate(text.split("\n")):
+        for x, c in enumerate(line):
+            if c == "#":
+                res.append((x,y))
+    return res
 
 
 def print_tile(tile):
@@ -199,6 +213,33 @@ def try_build(sid, stile, y_nr):
     return res
 
 
+def check_monster(image, monster, x0, y0):
+
+    res = 0
+    res_img = copy.deepcopy(image)
+    for x, y in monster:
+
+        cy = y0 + y
+        cx = x0 + x
+
+        if cy < len(image) and cx < len(image[0]):
+            if image[cy][cx] == "#":
+                res = res + 1
+
+                tmp = list(res_img[cy])
+                tmp.pop(cx)
+                tmp.insert(cx, "O")
+                tmp = "".join(tmp)
+                res_img.pop(cy)
+                res_img.insert(cy, tmp)
+
+
+    if res == len(monster):
+        return (True, res_img)
+    
+    return (False, None)
+
+
 
 ####################################
 # MAIN
@@ -253,7 +294,7 @@ starts = [(c, tile_transforms[c]) for c in corners]
 
 
 print("")
-for sid, s in starts[1:2]:
+for sid, s in starts:
     for t in s:
 
         res = try_build(sid, t, image_edge)
@@ -268,10 +309,44 @@ for sid, s in starts[1:2]:
 
             for row in res:
                 print([x[0] for x in row])
-                #for xid, xtile in row:
-                #    print("")
-                #    print_tile(xtile)
+            break
+    
+    if acc == len(tiles):
+        break
 
-            sys.exit(1)
+#remove borders
+image_nb = []
+for row in res:
+    nr = []
+    for tid, tile in row:
+        t = tile[1:-1]
+        t = [x[1:-1] for x in t]
+        nr.append(t)
+    image_nb.append(nr)
+
+
+image = []
+for row in image_nb: 
+    for nr in (list(zip(*row))):
+        line = "".join(nr)
+        image.append(line)
+
+print("")
+for line in image:
+    print(line)
+
+
+msl = parse_monster(monster)
+#print(msl)
+
+
+acc = 0
+for y, row in enumerate(image):
+    for x, c in enumerate(row):
+        res, img = check_monster(image, msl, x, y)
+        if res == True:
+            print("")
+            print_tile(img)
+        
 
 
