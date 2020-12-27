@@ -95,6 +95,8 @@ def all_transforms(image):
 
     res = set()
 
+    rowlen = len(image[0])
+
     for rot in [0, 90, 180, 270]:
         for f in [nop, flip_v, flip_h]:
             tmp = copy.deepcopy(image)
@@ -102,13 +104,14 @@ def all_transforms(image):
             tmp = "".join(tmp)
 
             res.add(tmp)
-    #print(res)
+    
+    #print(len(res))
 
     tmp = []
     for r in res:
         t = []
-        for l in range(0, len(r), 10):
-            t.append(r[l:l+10])
+        for l in range(0, len(r), rowlen):
+            t.append(r[l:l+rowlen])
         tmp.append(t)
 
     return tmp
@@ -240,6 +243,22 @@ def check_monster(image, monster, x0, y0):
     return (False, None)
 
 
+def count_monsters(image, msl):
+    
+    res = 0
+
+    cimg = copy.deepcopy(image)
+    for y in range(len(cimg)):
+        for x in range(len(cimg[y])):
+            tmpres, img = check_monster(cimg, msl, x, y)
+            if tmpres == True:
+                cimg = img
+                res = res + 1
+    
+    return(res, cimg)
+
+
+
 
 ####################################
 # MAIN
@@ -340,13 +359,34 @@ msl = parse_monster(monster)
 #print(msl)
 
 
-acc = 0
-for y, row in enumerate(image):
-    for x, c in enumerate(row):
-        res, img = check_monster(image, msl, x, y)
-        if res == True:
-            print("")
-            print_tile(img)
+
+#print("")
+#print_tile(img)
+#print(res)
+
+##max_monsters = 0
+#for at in all_transforms(image):
+#    res, img = count_monsters(image, msl)
+#    if res > 0:
+#        print("")
+#        print(res)
+#        print_tile(img)
+
+res = [count_monsters(i, msl) for i in all_transforms(image)]
+mnrs = [r[0] for r in res]
+
+res_nr = max(mnrs)
+res_img = res[mnrs.index(res_nr)][1]
+
+print("")
+print(res_nr)
+print_tile(res_img)
+
+sharp_nr = 0
+for r in res_img:
+    sharp_nr = sharp_nr + r.count("#")
+
+print("SOL2: {}".format(sharp_nr))
         
 
 
