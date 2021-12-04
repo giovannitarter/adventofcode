@@ -1,0 +1,113 @@
+#!/usr/bin/python
+
+
+import sys
+import copy
+
+
+def transpose(mat):
+    return [list(x) for x in zip(*mat)]
+
+
+class Board():
+
+    def __init__(self, mat):
+        
+        self.mat = []
+        for r in mat:
+            self.mat.append([(n, False) for n in r])
+
+        return
+
+
+    def mark(self, nr):
+
+        for i in range(len(self.mat)):
+            for j in range(len(self.mat[0])):
+                if self.mat[i][j][0] == nr:
+                    self.mat[i][j] = (nr, True)
+
+        return
+
+
+    def print(self):
+        
+        print("")
+        for r in self.mat:
+            print(r)
+        return
+
+
+    def check(self):
+        
+        res = None
+        for row in self.mat:
+            if len([x for x in row if x[1] == True]) == 5:
+                res = True
+                break
+
+        if not res:
+            for col in transpose(self.mat):
+                if len([x for x in col if x[1] == True]) == 5:
+                    res = True
+                    break
+
+        if res:
+            res = []
+            for c in self.mat:
+                res.extend([int(x[0]) for x in c if x[1] == False])
+            res = sum(res)
+
+        return res
+
+
+
+
+if __name__ == "__main__":
+
+    RES02 = None
+
+    FD = open(sys.argv[1])
+    TEXT = FD.read()
+    FD.close()
+
+    LINES = [ x for x in TEXT.split("\n") if x != "" ]
+
+
+    drawn = LINES.pop(0).split(",")
+    print(drawn)
+
+    boards = []
+    for i in range(0, len(LINES), 5):
+        boards.append(Board([ b.split() for b in LINES[i:i+5] ]))
+
+    wins = []
+
+    for d in drawn:
+        print("Drawn {}".format(d))
+
+        win_value = None
+        win_boards = []
+        for b in boards:
+            b.mark(d)
+            b.print()
+            res = b.check()
+            print("res: {}".format(res))
+            if res is not None:
+                win_boards.append(b)
+                win_value = res * int(d)
+                wins.append(win_value)
+        
+        for b in win_boards:
+            boards.remove(b)
+
+        if len(boards) == 0:
+            break
+        
+        print(wins)
+        print("")
+        
+    
+
+    RES02 = wins[-1]
+    print("res02 : {}".format(RES02))
