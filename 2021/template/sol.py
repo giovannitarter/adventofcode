@@ -8,7 +8,7 @@ import copy
 
 if __name__ == "__main__":
 
-    RES01 = None
+    RES = None
 
     FD = open(sys.argv[1])
     TEXT = FD.read()
@@ -19,4 +19,4 @@ if __name__ == "__main__":
 
 
 
-    print("res01 : {}".format(RES01))
+    print("res : {}".format(RES))
