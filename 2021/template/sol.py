@@ -6,6 +6,14 @@ import copy
 
 
 
+def parse_input(text):
+
+    res = None
+    lines = [ x for x in text.split("\n") if x != "" ]
+
+    return res
+
+
 if __name__ == "__main__":
 
     RES = None
@@ -14,9 +22,6 @@ if __name__ == "__main__":
     TEXT = FD.read()
     FD.close()
 
-    LINES = [ x for x in TEXT.split("\n") if x != "" ]
-
-
-
+    DATA = parse_input(TEXT)
 
     print("res : {}".format(RES))
