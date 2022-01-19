@@ -14,7 +14,6 @@ AMPHIPODS = {
         "C" : 100,
         "D" : 1000,
         }
-ROOM_OUT = [(3, 1), (5, 1), (7, 1), (9, 1)]
 
 AMP_ROOMS = {
         "A" : 3,
@@ -28,6 +27,7 @@ FOLDED = """
   #D#B#A#C#
 """
 
+FINAL_STATE = "A#B#C#D"
 
 
 def parse_input(text):
@@ -41,31 +41,6 @@ def parse_input(text):
         while len(tmp) < 13:
             tmp.append(" ")
         res.append(tmp)
-
-    return res
-
-
-def get_neigh(x, y, burrow):
-
-    res = []
-
-    max_x = len(burrow[0])
-    max_y = len(burrow)
-
-    cand = [(1, 0), (0, 1), (-1, 0), (0, -1)]
-    for xm, ym in cand:
-        xc = xm + x
-        yc = ym + y
-
-        #size check
-        if 0 <= xc < max_x and 0 <= yc <= max_y:
-
-            val = burrow[yc][xc]
-            if (
-                    val not in AMPHIPODS
-                    and val != "#"
-               ):
-                res.append((xc, yc))
 
     return res
 
@@ -89,72 +64,85 @@ def print_burrow(burrow):
     print("")
     return
 
+
 def all_single_amphipod_moves(burrow, start):
 
     res = []
 
-    q = [(0, start)]
-    dist = {start: 0}
+    hallway = [(1,1), (2,1), (4,1), (6,1), (8,1), (10,1), (11,1)]
 
-    while q:
-        _, u = heapq.heappop(q)
+    st_x, st_y = start
 
-        for v in get_neigh(*u, burrow):
+    if st_y > 1:
 
-            alt = dist.get(u, sys.maxsize) + 1
-            if alt < dist.get(v, sys.maxsize):
-                dist[v] = alt
-                heapq.heappush(q, (alt, v))
+        blocked = False
+        for j in range(st_y-1, 0, -1):
+            hval = burrow[j][st_x]
+            if hval != ".":
+                blocked = True
+                break
 
-    cand = list(dist.keys())
-    for c in cand:
+        if not blocked:
+            for hp in hallway:
 
-        if dist[c] == 0:
-            continue
+                hx, hy = hp
+                hval = burrow[hy][hx]
+                if st_x > hx:
+                    if hval  == ".":
+                        res.append(hp)
+                    else:
+                        res = []
 
-        if c in ROOM_OUT:
-            continue
+                elif st_x < hx:
+                    if hval == ".":
+                        res.append(hp)
+                    else:
+                        break
 
-        cx, cy = c
-        start_x, start_y = start
+    elif st_y == 1:
+        amp = burrow[st_y][st_x]
+        dst_x = AMP_ROOMS[amp]
 
-        #discard all from hallway to hallway
-        if start_y == 1 and cy == 1:
-            continue
-
-        #discard if in a room and destination is not hallway
-        if start_y > 1 and cy != 1:
-            continue
-
-        #always move to the bottom of a room
-        if burrow[cy+1][cx] == ".":
-            continue
-
-        moving_amp = burrow[start_y][start_x]
-
-        #if moving from hallway to room
-        if cy > 1:
-            if cx != AMP_ROOMS[moving_amp]:
+        dst_y = None
+        for cy in range(len(burrow)-2, 1, -1):
+            cval = burrow[cy][dst_x]
+            if cval == amp:
                 continue
 
-        #dont move if already in the right room
-        if start_y > 1:
-            if start_x == AMP_ROOMS[moving_amp]:
-                move = False
-                for j in range(start_y, len(burrow)-1):
-                    #print(f"j: {moving_amp} {start_x},{j}")
-                    if burrow[j][start_x] != moving_amp:
-                        move = True
-                        break
-                if move == False:
-                    continue
+            elif cval == ".":
+                dst_y = cy
+                break
 
+            else:
+                break
 
-        res.append((c, dist[c]))
+        if dst_y is not None:
 
+            cx = st_x
+            if cx > dst_x:
+                cx -= 1
+            elif cx < dst_x:
+                cx += 1
 
-    #print(f"res: {res}")
-    return res
+            while cx != dst_x:
+
+                if burrow[st_y][cx] != ".":
+                    break
+
+                if cx > dst_x:
+                    cx -= 1
+                elif cx < dst_x:
+                    cx += 1
+
+            if cx == dst_x:
+                res.append((dst_x, dst_y))
+
+    tmp = []
+    for x, y in res:
+        dist = abs(x-st_x) + abs(y-st_y)
+        tmp.append(((x, y), dist))
+
+    return tmp
 
 
 def apply_move(amp, dst, cost, burrow):
@@ -180,10 +168,6 @@ def all_moves(burrow):
         for dst, cost in moves:
             res.append(apply_move(a, dst, cost, burrow))
 
-    res.sort(key=lambda x: x[1])
-    #keep = min(len(res), 5)
-    #res = res[:keep]
-
     return res
 
 
@@ -191,18 +175,11 @@ def is_organized(burrow):
 
     res = True
 
-    for x, a in [(3, "A"), (5, "B"), (7, "C"), (9, "D")]:
+    tmp = burrow[2:-1]
+    for r in tmp:
+        cmp = "".join(r[3:10])
 
-        y = len(burrow)-2
-        occ = 0
-        while y > 1:
-            if burrow[y][x] == a:
-                occ += 1
-            else:
-                break
-            y -= 1
-
-        if occ != len(burrow)-3:
+        if cmp != FINAL_STATE:
             res = False
             break
 
@@ -229,6 +206,7 @@ def is_organized(burrow):
 #        res -= occ
 #
 #    return res
+
 
 def h(s):
     return 0
@@ -273,8 +251,6 @@ def find_best_path(burrow):
                 hscore = alt + h(sv)
                 f_score[sv] = hscore
                 heapq.heappush(q, (hscore, sv))
-
-                #print_burrow(v)
 
     path = [de_serialize(res)]
     c = prev[res]
@@ -328,10 +304,14 @@ if __name__ == "__main__":
     DATA2 = add_folded(DATA)
     print_burrow(DATA2)
 
-    #ORDERED, RES = find_best_path(DATA2)
-    #print("ordered:")
-    #print_burrow(ORDERED)
-    #print("sol02: {}".format(RES))
+    ORDERED, RES = find_best_path(DATA2)
+    print("ordered:")
+
+    #for b in ORDERED:
+    #    print_burrow(b)
+
+    print_burrow(ORDERED[-1])
+    print("sol02: {}".format(RES))
 
     etime = perf_counter()
     print(f"time: {etime - stime}")
