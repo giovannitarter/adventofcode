@@ -14,6 +14,16 @@ def parse_input(text):
     return res
 
 
+def sol01(data):
+    res = None
+    return res
+
+
+def sol02(data):
+    res = None
+    return res
+
+
 if __name__ == "__main__":
 
     RES = None
@@ -23,5 +33,11 @@ if __name__ == "__main__":
     FD.close()
 
     DATA = parse_input(TEXT)
+    print(f"DATA:\n{DATA}\n")
 
-    print("res : {}".format(RES))
+    SOL01 = sol01(DATA)
+    print("SOL01: {}".format(SOL01))
+    
+    SOL02 = sol02(DATA)
+    print("SOL02: {}".format(SOL02))
+
