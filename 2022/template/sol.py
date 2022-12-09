@@ -9,7 +9,7 @@ import copy
 def parse_input(text):
 
     res = None
-    lines = [ x for x in text.split("\n") if x != "" ]
+    lines = [x for x in text.split("\n") if x != ""]
 
     return res
 
