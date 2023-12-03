@@ -17,19 +17,19 @@ class TestAoC(unittest.TestCase):
             self.input_data = sol.parse_input(data)
 
     def test_sol01_ex(self):
-        self.assertEqual(sol.sol01(self.test_data), 8)
+        self.assertEqual(sol.sol01(self.test_data), 4361)
         return
     
     def test_sol02_ex(self):
-        self.assertEqual(sol.sol02(self.test_data), 2286)
+        self.assertEqual(sol.sol02(self.test_data), 467835)
         return
     
     def test_sol01_input(self):
-        self.assertEqual(sol.sol01(self.input_data), 2679)
+        self.assertEqual(sol.sol01(self.input_data), 527364)
         return
     
     def test_sol02_input(self):
-        self.assertEqual(sol.sol02(self.input_data), 77607)
+        self.assertEqual(sol.sol02(self.input_data), 79026871)
         return
 
 
