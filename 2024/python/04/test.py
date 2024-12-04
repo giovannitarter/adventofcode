@@ -24,25 +24,25 @@ class TestAoC(unittest.TestCase):
         """
         test01
         """
-        self.assertEqual(sol.sol01(self.test_data), 46)
+        self.assertEqual(sol.sol01(self.test_data), 18)
 
     def test_test02(self):
         """
         test02
         """
-        self.assertEqual(sol.sol02(self.test_data), 51)
+        self.assertEqual(sol.sol02(self.test_data), 9)
 
     def test_input01(self):
         """
         input01
         """
-        self.assertEqual(sol.sol01(self.input_data), 7788)
+        self.assertEqual(sol.sol01(self.input_data), 2560)
 
     def test_input02(self):
         """
         input02
         """
-        self.assertEqual(sol.sol02(self.input_data), None)
+        self.assertEqual(sol.sol02(self.input_data), 1910)
 
 
 if __name__ == "__main__":
