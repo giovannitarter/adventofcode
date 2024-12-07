@@ -24,8 +24,8 @@ def timeit(f):
 
 def parse_input(text):
     "input parsing function"
-    res = [x for x in text.split("\n") if x != ""]
-    return res
+    res = [tuple(x.split(":")) for x in text.split("\n") if x != ""]
+    return [(int(a), tuple(map(int, b.strip().split()))) for a, b in res]
 
 
 def print_input(data):
@@ -33,18 +33,50 @@ def print_input(data):
     print(f"DATA:\n{data}\n")
 
 
+def try_operators(res, vals):
+
+    if len(vals) == 1:
+        return vals[0] == res
+
+    else:
+        return any(
+                [
+                    try_operators(res, (vals[0] + vals[1], *vals[2:])),
+                    try_operators(res, (vals[0] * vals[1], *vals[2:]))
+                ]
+                )
+
+
+def try_operators2(res, vals):
+
+    if len(vals) == 1:
+        return vals[0] == res
+
+    elif vals[0] > res:
+        return False
+
+    else:
+        return any(
+                [
+                    try_operators2(res, (vals[0] + vals[1], *vals[2:])),
+                    try_operators2(res, (vals[0] * vals[1], *vals[2:])),
+                    try_operators2(res,
+                                  (int(str(vals[0]) + str(vals[1])), *vals[2:])
+                                  )
+                ]
+                )
+
+
 @timeit
 def sol01(data):
     "solution for part 1"
-    res = None
-    return res
+    return sum(list(map(lambda d: d[0] if try_operators(*d) else 0, data)))
 
 
 @timeit
 def sol02(data):
     "solution for part 2"
-    res = None
-    return res
+    return sum(list(map(lambda d: d[0] if try_operators2(*d) else 0, data)))
 
 
 if __name__ == "__main__":
@@ -55,7 +87,7 @@ if __name__ == "__main__":
         TEXT = fd.read()
 
     DATA = parse_input(TEXT)
-    print_input(DATA)
+    # print_input(DATA)
     SOL01 = sol01(DATA)
     print(f"SOL01: {SOL01}")
     SOL02 = sol02(DATA)
